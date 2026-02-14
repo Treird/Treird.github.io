@@ -1,6 +1,6 @@
 // ==========================================
 // D&M CARROZZERIA - MAIN JAVASCRIPT
-// Versión Mejorada y Organizada
+// Versión Consolidada y Limpia
 // ==========================================
 
 /* ==========================================
@@ -18,14 +18,20 @@
    11. WhatsApp Integration
    12. Status Checker
    13. 3D Tilt Effects
+   14. Mobile Menu
+   15. Dark/Light Theme Toggle
+   16. Testimonials Carousel
+   17. Lazy Loading
+   18. Gallery Lightbox
+   19. Chatbot Functionality
    ========================================== */
 
 
 // ==========================================
 // 1. VARIABLES GLOBALES
 // ==========================================
-var totalEstimate = 0;
 var selectedParts = [];
+var priceMultiplier = 1;
 let countersStarted = false;
 
 
@@ -179,81 +185,160 @@ function moveSlider(val) {
 // 7. PRICING CALCULATOR
 // ==========================================
 
-// Función de selección de partes
-window.togglePart = function(btn, price, namePart) {
-    // Cambiar aspecto visual
-    btn.classList.toggle('selected');
-    
-    // Detectar si acabamos de seleccionar o deseleccionar
-    const isSelected = btn.classList.contains('selected');
-
-    if (isSelected) {
-        // SUMAR
-        totalEstimate += price;
-        selectedParts.push({ name: namePart, price: price });
-    } else {
-        // RESTAR
-        totalEstimate -= price;
-        // Eliminar el elemento del array
-        selectedParts = selectedParts.filter(item => item.name !== namePart);
-    }
-
-    // Actualizar la pantalla
-    updateDisplay();
-};
-
-// Función para actualizar la pantalla del calculador
-function updateDisplay() {
-    const priceElement = document.getElementById('totalPrice');
-    const listElement = document.getElementById('selectedList');
-
-    if (priceElement) {
-        priceElement.innerText = totalEstimate;
-    }
-
-    if (listElement) {
-        if (selectedParts.length === 0) {
-            listElement.innerHTML = '<li>Nessuna parte selezionata...</li>';
-        } else {
-            // Generar la lista HTML
-            listElement.innerHTML = selectedParts
-                .map(part => `<li style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                                <span>${part.name}</span> 
-                                <span style="color:white;">€${part.price}</span>
-                        </li>`)
-                .join('');
-        }
+// Función para cambiar el acabado de pintura
+function updatePriceModifier() {
+    const selector = document.getElementById('paintFinish');
+    if (selector) {
+        priceMultiplier = parseFloat(selector.value);
+        calculateTotal();
     }
 }
 
-// Función de reserva por WhatsApp desde el calculador
-window.bookEstimate = function() {
-    // Validación: Si es 0, avisar
-    if (totalEstimate === 0) {
-        alert("Per favore, seleziona almeno una parte dell'auto prima di prenotare.");
+// Función principal de selección de partes
+window.togglePart = function(arg1, arg2, arg3, arg4) {
+    let event, btn, price, name;
+
+    // Detectar qué tipo de llamada es (con o sin evento)
+    if (arg1 && (arg1 instanceof Event || arg1.type === 'click')) {
+        // HTML nuevo: togglePart(event, this, price, name)
+        event = arg1;
+        btn = arg2;
+        price = arg3;
+        name = arg4;
+    } else {
+        // HTML viejo: togglePart(this, price, name)
+        event = window.event;
+        btn = arg1;
+        price = arg2;
+        name = arg3;
+    }
+
+    if (!btn) { 
+        console.error("Error: No se encontró el botón"); 
+        return; 
+    }
+
+    // Efecto de partículas solo al activar
+    if (!btn.classList.contains('active') && event) {
+        createParticles(event, btn);
+    }
+
+    // Toggle del estado
+    btn.classList.toggle('active');
+    
+    // Actualizar array de partes seleccionadas
+    if (btn.classList.contains('active')) {
+        // Evitar duplicados
+        const exists = selectedParts.find(p => p.name === name);
+        if (!exists) {
+            selectedParts.push({ name: name, price: price });
+        }
+    } else {
+        selectedParts = selectedParts.filter(part => part.name !== name);
+    }
+    
+    // Recalcular total
+    calculateTotal();
+}
+
+// Función para crear partículas
+window.createParticles = function(event, btnElement) {
+    let x, y;
+    
+    if (event && event.clientX) {
+        x = event.clientX;
+        y = event.clientY;
+    } else {
+        const rect = btnElement.getBoundingClientRect();
+        x = rect.left + rect.width / 2;
+        y = rect.top + rect.height / 2;
+    }
+
+    for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('span');
+        particle.classList.add('particle');
+        document.body.appendChild(particle);
+
+        const colors = ['var(--primary)', '#00d4ff', '#ffffff'];
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 60 + Math.random() * 60;
+        const destinationX = Math.cos(angle) * distance;
+        const destinationY = Math.sin(angle) * distance;
+
+        particle.style.setProperty('--tx', `${destinationX}px`);
+        particle.style.setProperty('--ty', `${destinationY}px`);
+        
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        setTimeout(() => particle.remove(), 600);
+    }
+}
+
+// Función para calcular el total
+window.calculateTotal = function() {
+    const listElement = document.getElementById('selectedList');
+    const totalElement = document.getElementById('totalPrice');
+    
+    if (!listElement || !totalElement) return;
+
+    listElement.innerHTML = '';
+    let baseTotal = 0;
+
+    if (selectedParts.length === 0) {
+        listElement.innerHTML = '<li style="color: #aaa;">Nessuna parte selezionata...</li>';
+        totalElement.innerText = '0';
         return;
     }
 
-    // Número de WhatsApp (actualizar con tu número real)
-    const numeroTaller = "391234567890"; 
+    selectedParts.forEach(part => {
+        baseTotal += part.price;
+        let li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.marginBottom = '8px';
+        li.innerHTML = `${part.name} <span style="font-weight:bold">€${part.price}</span>`;
+        listElement.appendChild(li);
+    });
 
-    // Crear lista para el mensaje
-    const listaTexto = selectedParts
-        .map(p => `- ${p.name} (€${p.price})`)
-        .join('%0A'); // %0A es el salto de línea en WhatsApp
+    let finalTotal = baseTotal * priceMultiplier;
+    finalTotal = Math.round(finalTotal);
+    totalElement.innerText = finalTotal;
+}
 
-    // Mensaje final
-    const mensaje = 
-        `🤖 *Nuovo Preventivo Online*%0A` +
-        `Ho usato il calcolatore sul sito:%0A%0A` +
-        `${listaTexto}%0A` +
-        `------------------%0A` +
-        `💰 *Stima Totale: €${totalEstimate}*%0A%0A` +
-        `Vorrei prenotare un appuntamento per confermare il prezzo.`;
+// Función para reservar por WhatsApp desde el calculador
+window.bookEstimate = function() {
+    if (selectedParts.length === 0) {
+        alert("Seleziona almeno una parte dell'auto.");
+        return;
+    }
+    
+    const total = document.getElementById('totalPrice').innerText;
+    let finishName = "Standard";
+    const selector = document.getElementById('paintFinish');
+    if(selector) {
+        finishName = selector.options[selector.selectedIndex].text;
+    }
+    
+    let message = `🤖 Ciao! Vorrei un preventivo.\n\n*Finitura:* ${finishName}\n*Parti:*\n`;
+    selectedParts.forEach(p => {
+        message += `- ${p.name}\n`;
+    });
+    message += `\n*Stima Web:* €${total}`;
+    
+    // Cambiar este número por el tuyo
+    window.open(`https://wa.me/391234567890?text=${encodeURIComponent(message)}`, '_blank');
+}
 
-    // Abrir WhatsApp
-    window.open(`https://wa.me/${numeroTaller}?text=${mensaje}`, '_blank');
-};
+// Listener para el selector de acabado
+document.addEventListener('DOMContentLoaded', () => {
+    const selector = document.getElementById('paintFinish');
+    if (selector) {
+        selector.addEventListener('change', updatePriceModifier);
+    }
+});
 
 
 // ==========================================
@@ -269,7 +354,6 @@ function toggleModal() {
         setTimeout(() => modal.style.display = 'none', 300);
     } else {
         modal.style.display = 'flex';
-        // Pequeño delay para permitir que display flex se aplique antes de la transición
         setTimeout(() => modal.classList.add('modal-active'), 10);
     }
 }
@@ -279,21 +363,16 @@ function toggleModal() {
 // 9. FAQ ACCORDION
 // ==========================================
 function toggleFaq(element) {
-    // Buscar el contenedor padre (.faq-item)
     const item = element.parentElement;
     const answer = item.querySelector('.faq-answer');
     
     if (!item || !answer) return;
     
-    // Alternar la clase activo
     item.classList.toggle('active');
     
-    // Calcular la altura para la animación
     if (item.classList.contains('active')) {
-        // Si se abre, la altura es igual al contenido
         answer.style.maxHeight = answer.scrollHeight + "px";
     } else {
-        // Si se cierra, altura cero
         answer.style.maxHeight = "0";
     }
 }
@@ -324,11 +403,9 @@ function rejectCookies() {
 
 // Mostrar el banner al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
-    // Verificar si ya hay una decisión guardada
     const decision = localStorage.getItem('novaCookieConsent');
     
     if (!decision) {
-        // Si no hay decisión, mostrar el banner tras 2 segundos
         setTimeout(() => {
             const banner = document.getElementById('cookie-banner');
             if (banner) {
@@ -344,29 +421,25 @@ document.addEventListener("DOMContentLoaded", () => {
 // 11. WHATSAPP INTEGRATION (Modal Form)
 // ==========================================
 function enviarWhatsapp(e) {
-    e.preventDefault(); // Evitar que se recargue la página
+    e.preventDefault();
 
-    // Recoger los datos del formulario
     const nombre = document.getElementById('wa_nombre')?.value || '';
     const telefono = document.getElementById('wa_telefono')?.value || '';
     const servicio = document.getElementById('wa_servicio')?.value || '';
     const mensaje = document.getElementById('wa_mensaje')?.value || '';
 
-    // Número de WhatsApp (actualizar con tu número real)
+    // Cambiar este número por el tuyo
     const numeroTaller = "391234567890"; 
 
-    // Crear el mensaje
     const texto = 
         `👋 Ciao Carrozzeria Nova, vorrei un preventivo.%0A%0A` +
         `👤 *Nome:* ${nombre}%0A` +
         `📞 *Telefono:* ${telefono}%0A` +
-        `🚗 *Servizio:* ${servicio}%0A` +
+        `🚗 *Servizio:* ${servizio}%0A` +
         `📝 *Note:* ${mensaje}`;
 
-    // Abrir WhatsApp
     window.open(`https://wa.me/${numeroTaller}?text=${texto}`, '_blank');
 
-    // Cerrar modal (intentar)
     try { 
         toggleModal(); 
     } catch(err) {
@@ -409,7 +482,6 @@ function checkStatus() {
     }
 }
 
-// Ejecutar al cargar la página
 document.addEventListener('DOMContentLoaded', checkStatus);
 
 
@@ -439,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
             
-            const rotateX = ((y - centerY) / centerY) * -10; // Máximo 10 grados
+            const rotateX = ((y - centerY) / centerY) * -10;
             const rotateY = ((x - centerX) / centerX) * 10;
 
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
@@ -449,6 +521,645 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
         });
     });
+});
+
+
+// ==========================================
+// 15. DARK/LIGHT THEME TOGGLE
+// ==========================================
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Cambiar icono del botón
+    const icon = document.querySelector('#theme-toggle i');
+    if (icon) {
+        if (newTheme === 'dark') {
+            icon.className = 'fa-solid fa-sun';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+        }
+    }
+}
+
+// Cargar tema guardado al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const icon = document.querySelector('#theme-toggle i');
+    if (icon && savedTheme === 'dark') {
+        icon.className = 'fa-solid fa-sun';
+    }
+});
+
+
+// ==========================================
+// 16. TESTIMONIALS CAROUSEL
+// ==========================================
+let currentTestimonial = 0;
+
+function changeTestimonial(direction) {
+    const items = document.querySelectorAll('.testimonial-item');
+    const dots = document.querySelectorAll('.testimonial-dots .dot');
+    
+    if (!items.length) return;
+    
+    // Remover clase active del testimonio actual
+    items[currentTestimonial].classList.remove('active');
+    dots[currentTestimonial].classList.remove('active');
+    
+    // Calcular nuevo índice
+    currentTestimonial += direction;
+    
+    // Loop circular
+    if (currentTestimonial < 0) {
+        currentTestimonial = items.length - 1;
+    } else if (currentTestimonial >= items.length) {
+        currentTestimonial = 0;
+    }
+    
+    // Añadir clase active al nuevo testimonio
+    items[currentTestimonial].classList.add('active');
+    dots[currentTestimonial].classList.add('active');
+}
+
+function goToTestimonial(index) {
+    const items = document.querySelectorAll('.testimonial-item');
+    const dots = document.querySelectorAll('.testimonial-dots .dot');
+    
+    if (!items.length) return;
+    
+    items[currentTestimonial].classList.remove('active');
+    dots[currentTestimonial].classList.remove('active');
+    
+    currentTestimonial = index;
+    
+    items[currentTestimonial].classList.add('active');
+    dots[currentTestimonial].classList.add('active');
+}
+
+// Auto-rotate testimonials cada 5 segundos
+let testimonialInterval;
+
+function startTestimonialAutoRotate() {
+    testimonialInterval = setInterval(() => {
+        changeTestimonial(1);
+    }, 5000);
+}
+
+function stopTestimonialAutoRotate() {
+    if (testimonialInterval) {
+        clearInterval(testimonialInterval);
+    }
+}
+
+// Iniciar auto-rotate cuando la página carga
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.querySelector('.testimonial-item')) {
+        startTestimonialAutoRotate();
+        
+        // Pausar en hover
+        const container = document.querySelector('.testimonials-container');
+        if (container) {
+            container.addEventListener('mouseenter', stopTestimonialAutoRotate);
+            container.addEventListener('mouseleave', startTestimonialAutoRotate);
+        }
+    }
+});
+
+
+// ==========================================
+// 17. LAZY LOADING DE IMÁGENES
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Lazy loading para todas las imágenes con clase 'lazy'
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    // La imagen se cargará automáticamente gracias al atributo loading="lazy"
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+    
+    // Optimización adicional: Añadir loading="lazy" a imágenes de galería
+    document.querySelectorAll('.gallery-item img, .case-study-image img').forEach(img => {
+        if (!img.hasAttribute('loading')) {
+            img.setAttribute('loading', 'lazy');
+        }
+    });
+});
+
+
+// ==========================================
+// 18. GALLERY LIGHTBOX
+// ==========================================
+
+// Array de imágenes de la galería
+const galleryImages = [
+    {
+        src: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=1200",
+        caption: "Verniciatura Completa BMW"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200",
+        caption: "Levabolli Grandine Mercedes"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200",
+        caption: "Restauro Tesla Model S"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200",
+        caption: "Riparazione Paraurti Audi"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1200",
+        caption: "Verniciatura Opaca Porsche"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=1200",
+        caption: "Riparazione Cofano Ferrari"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=1200",
+        caption: "Restauro Completo Range Rover"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=1200",
+        caption: "Verniciatura Metallizzata"
+    },
+    {
+        src: "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=1200",
+        caption: "Riparazione Sportiva"
+    }
+];
+
+let currentImageIndex = 0;
+
+// Abrir lightbox con imagen específica
+function openLightbox(index) {
+    currentImageIndex = index;
+    const lightbox = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    const caption = document.getElementById('lightbox-caption');
+    const counter = document.getElementById('lightbox-counter');
+    
+    if (lightbox && img && caption && counter) {
+        img.src = galleryImages[index].src;
+        caption.innerText = galleryImages[index].caption;
+        counter.innerText = `${index + 1} / ${galleryImages.length}`;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevenir scroll
+    }
+}
+
+// Cerrar lightbox
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox) {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = ''; // Restaurar scroll
+    }
+}
+
+// Cambiar imagen en el lightbox
+function changeLightboxImage(direction) {
+    currentImageIndex += direction;
+    
+    // Loop circular
+    if (currentImageIndex < 0) {
+        currentImageIndex = galleryImages.length - 1;
+    } else if (currentImageIndex >= galleryImages.length) {
+        currentImageIndex = 0;
+    }
+    
+    const img = document.getElementById('lightbox-img');
+    const caption = document.getElementById('lightbox-caption');
+    const counter = document.getElementById('lightbox-counter');
+    
+    if (img && caption && counter) {
+        img.src = galleryImages[currentImageIndex].src;
+        caption.innerText = galleryImages[currentImageIndex].caption;
+        counter.innerText = `${currentImageIndex + 1} / ${galleryImages.length}`;
+    }
+}
+
+// Navegación con teclado
+document.addEventListener('keydown', (e) => {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox && lightbox.classList.contains('active')) {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+            changeLightboxImage(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeLightboxImage(1);
+        }
+    }
+});
+
+
+// ==========================================
+// 19. CHATBOT FUNCTIONALITY
+// ==========================================
+
+// Estado del chatbot
+let chatbotOpen = false;
+let conversationState = 'initial';
+let chatHistory = [];
+
+// Árbol de conversación
+const chatFlows = {
+    initial: {
+        message: "👋 Ciao! Sono l'assistente virtuale di D&M Carrozzeria. Come posso aiutarti oggi?",
+        options: [
+            { text: "📋 Informazioni sui Servizi", icon: "fa-list", next: "servizi" },
+            { text: "💰 Prezzi e Preventivi", icon: "fa-euro-sign", next: "prezzi" },
+            { text: "⏰ Orari e Prenotazioni", icon: "fa-clock", next: "orari" },
+            { text: "🚗 Domande sulla Riparazione", icon: "fa-wrench", next: "riparazione" }
+        ]
+    },
+    
+    servizi: {
+        message: "Perfetto! Offriamo diversi servizi specializzati. Cosa ti interessa?",
+        options: [
+            { text: "🎨 Verniciatura", next: "verniciatura" },
+            { text: "⚡ Riparazione Grandine", next: "grandine" },
+            { text: "🔌 Veicoli Elettrici", next: "elettrici" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    verniciatura: {
+        message: "La nostra verniciatura è robotica con sistema 4.0. Include:\n\n✅ Corrispondenza colore al 99.9%\n✅ Cabina a forno pressurizzata\n✅ Vernici eco-friendly all'acqua\n✅ Garanzia a vita\n\nTempo medio: 3-5 giorni",
+        options: [
+            { text: "💰 Quanto costa?", next: "costo_verniciatura" },
+            { text: "📞 Voglio prenotare", next: "prenota" },
+            { text: "↩️ Altri servizi", next: "servizi" }
+        ]
+    },
+    
+    grandine: {
+        message: "Specialisti in riparazione danni da grandine con tecnica PDR:\n\n✅ Senza riverniciatura\n✅ Preserva vernice originale\n✅ Risparmio fino al 70%\n✅ Tempi ridotti (2-5 giorni)\n\nPerfetto per auto con ammaccature multiple!",
+        options: [
+            { text: "💰 Preventivo gratuito", next: "preventivo_grandine" },
+            { text: "📞 Contattaci", next: "prenota" },
+            { text: "↩️ Altri servizi", next: "servizi" }
+        ]
+    },
+    
+    elettrici: {
+        message: "Siamo certificati PES/PAV per veicoli elettrici! 🔋\n\n✅ Personale specializzato\n✅ Sicurezza garantita\n✅ Lavoriamo su Tesla, BMW i, Audi e-tron, ecc.\n✅ Rispetto dei protocolli del produttore",
+        options: [
+            { text: "📋 Ho una Tesla/EV", next: "prenota" },
+            { text: "❓ È sicuro?", next: "sicurezza_ev" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    prezzi: {
+        message: "I nostri prezzi dipendono dal tipo di danno. Esempi indicativi:\n\n🚗 Portiera: €250-400\n🚗 Cofano: €300-500\n🚗 Paraurti: €200-350\n🚗 Verniciatura completa: preventivo personalizzato\n\nTi serve un preventivo preciso?",
+        options: [
+            { text: "📸 Sì, mando foto del danno", next: "preventivo_foto" },
+            { text: "🧮 Usa la calcolatrice", next: "calcolatrice" },
+            { text: "📞 Parlo con un tecnico", next: "prenota" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    orari: {
+        message: "📍 Siamo a Firenzuola (FI)\n\n🕐 Orari:\n• Lun-Ven: 08:00 - 18:00\n• Sabato: 09:00 - 12:00\n• Domenica: Chiuso\n\n✅ Auto di cortesia gratuita disponibile!",
+        options: [
+            { text: "📅 Prenota un appuntamento", next: "prenota" },
+            { text: "🗺️ Come arrivare", next: "mappa" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    riparazione: {
+        message: "Hai domande sulla riparazione? Dimmi:",
+        options: [
+            { text: "⏱️ Quanto tempo ci vuole?", next: "tempo" },
+            { text: "🏥 Gestite assicurazioni?", next: "assicurazione" },
+            { text: "🚗 Avete auto di cortesia?", next: "cortesia" },
+            { text: "📋 Garanzia?", next: "garanzia" }
+        ]
+    },
+    
+    tempo: {
+        message: "I tempi dipendono dal lavoro:\n\n⚡ Piccoli ritocchi: 1-2 giorni\n🚗 Verniciatura parziale: 3-5 giorni\n🎨 Verniciatura completa: 5-7 giorni\n☁️ Riparazione grandine: 2-5 giorni\n\nHai un'urgenza?",
+        options: [
+            { text: "✅ Sì, è urgente", next: "urgente" },
+            { text: "📞 Voglio prenotare", next: "prenota" },
+            { text: "↩️ Altre domande", next: "riparazione" }
+        ]
+    },
+    
+    assicurazione: {
+        message: "Sì! Offriamo la Cessione del Credito:\n\n✅ Zero anticipo da parte tua\n✅ Ci facciamo pagare direttamente dall'assicurazione\n✅ Lavoriamo con tutte le principali compagnie\n✅ Ti serve solo il modulo CAI (blu)\n\nComodo, vero? 😊",
+        options: [
+            { text: "📋 Come funziona nel dettaglio?", next: "dettagli_assicurazione" },
+            { text: "📞 Ho un sinistro, cosa faccio?", next: "prenota" },
+            { text: "↩️ Altre domande", next: "riparazione" }
+        ]
+    },
+    
+    cortesia: {
+        message: "Sì, abbiamo 3 auto di cortesia! 🚗\n\n✅ Gratuita per interventi oltre 3 giorni\n✅ Inclusa una microcar elettrica\n✅ Soggetta a disponibilità (meglio prenotare)\n\nVuoi riservarne una?",
+        options: [
+            { text: "✅ Sì, la prenoto", next: "prenota" },
+            { text: "↩️ Altre domande", next: "riparazione" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    garanzia: {
+        message: "Le nostre garanzie:\n\n✅ Verniciatura: GARANZIA A VITA\n✅ Riparazioni: 24 mesi\n✅ PDR Grandine: 12 mesi\n\nCertificata Nova Paint. Siamo sicuri del nostro lavoro! 💪",
+        options: [
+            { text: "🤩 Ottimo! Prenoto", next: "prenota" },
+            { text: "↩️ Altre domande", next: "riparazione" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    costo_verniciatura: {
+        message: "La verniciatura completa dipende dal veicolo:\n\n• Microcar: €1.500 - €2.000\n• Berlina media: €2.500 - €3.500\n• SUV/Premium: €3.500 - €5.000\n\nInclude tutto: smontaggio, preparazione, robot, forno, rimontaggio.",
+        options: [
+            { text: "📸 Chiedo preventivo preciso", next: "preventivo_foto" },
+            { text: "📞 Parlo con un tecnico", next: "prenota" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    preventivo_foto: {
+        message: "Perfetto! Per un preventivo accurato:\n\n📸 Invia 3-4 foto del danno via WhatsApp\n📝 Indica marca, modello e anno\n⏰ Risposta in max 2 ore (orario lavorativo)\n\nTi apro WhatsApp?",
+        options: [
+            { text: "✅ Sì, apri WhatsApp", next: "whatsapp" },
+            { text: "📞 Preferisco chiamare", next: "telefono" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    preventivo_grandine: {
+        message: "Per la grandine serve una visita:\n\n👁️ Dobbiamo vedere l'entità dei danni\n📸 Le foto non bastano per un preventivo accurato\n⚡ Valutazione gratuita in officina (20 min)\n\nVuoi fissare un appuntamento?",
+        options: [
+            { text: "📅 Sì, prenoto la valutazione", next: "prenota" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    calcolatrice: {
+        message: "Ottima idea! Ti porto alla nostra calcolatrice interattiva dove puoi selezionare le parti da riverniciare e vedere subito una stima. 🧮",
+        options: [
+            { text: "🧮 Vai alla Calcolatrice", action: "goToCalculator" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    mappa: {
+        message: "📍 Ci trovi qui:\n\nVia Provinciale, 50033 Firenzuola (FI)\n\nDalla SS 65: Uscita Firenzuola centro\nDalla A1: Uscita Barberino del Mugello + 20 min\n\nTi mando alla mappa?",
+        options: [
+            { text: "🗺️ Sì, apri mappa", action: "goToMap" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    urgente: {
+        message: "Capisco! Per urgenze:\n\n⚡ Servizio Fast Repair disponibile\n📞 Chiamaci subito per verificare disponibilità\n🚗 Eventuale auto di cortesia immediata\n\n+39 123 456 7890",
+        options: [
+            { text: "📞 Chiama ora", action: "call" },
+            { text: "💬 Manda WhatsApp", next: "whatsapp" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    sicurezza_ev: {
+        message: "Assolutamente sicuro! 🔒\n\n✅ Personale certificato PES/PAV\n✅ Protocolli specifici per batterie\n✅ Attrezzatura isolata\n✅ Esperienza con tutti i brand EV\n\nLa sicurezza è la nostra priorità numero uno.",
+        options: [
+            { text: "✅ Perfetto, prenoto", next: "prenota" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    dettagli_assicurazione: {
+        message: "Ecco come funziona:\n\n1️⃣ Porti l'auto + modulo CAI\n2️⃣ Noi fotografiamo e documentiamo\n3️⃣ Inviamo tutto all'assicurazione\n4️⃣ Ripariamo l'auto\n5️⃣ Ritiri senza pagare\n\nSemplice e senza stress! 😊",
+        options: [
+            { text: "📞 Ho il modulo, prenoto", next: "prenota" },
+            { text: "❓ Non ho il modulo", next: "no_modulo" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    no_modulo: {
+        message: "Nessun problema! Il modulo CAI (blu) lo richiedi alla tua assicurazione:\n\n📞 Chiama il numero verde\n📧 Oppure scaricalo dal sito\n⏱️ Di solito arriva in 24-48h\n\nUna volta che ce l'hai, siamo pronti! 👍",
+        options: [
+            { text: "✅ Ok, lo richiedo", next: "prenota" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    prenota: {
+        message: "Perfetto! Vuoi prenotare subito? 📅\n\nPuoi:\n• Chiamarci direttamente\n• Mandarci un messaggio WhatsApp\n• Compilare il form sul sito\n\nCosa preferisci?",
+        options: [
+            { text: "📞 Chiamata", action: "call" },
+            { text: "💬 WhatsApp", next: "whatsapp" },
+            { text: "📝 Form sul sito", action: "openModal" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    },
+    
+    whatsapp: {
+        message: "Ottimo! Ti apro WhatsApp ora. 💬\n\nRicordati di dirci:\n✅ Nome e numero\n✅ Tipo di servizio\n✅ Urgenza/disponibilità\n\nTi rispondiamo in 30 minuti! ⚡",
+        options: [
+            { text: "💬 Apri WhatsApp", action: "openWhatsApp" }
+        ]
+    },
+    
+    telefono: {
+        message: "Chiamaci al:\n\n📞 +39 123 456 7890\n\n⏰ Lun-Ven: 08:00-18:00\n⏰ Sab: 09:00-12:00\n\nSiamo pronti ad aiutarti! 😊",
+        options: [
+            { text: "📞 Chiama ora", action: "call" },
+            { text: "💬 Preferisco WhatsApp", next: "whatsapp" },
+            { text: "↩️ Torna al Menu", next: "initial" }
+        ]
+    }
+};
+
+// Toggle chatbot
+function toggleChatbot() {
+    chatbotOpen = !chatbotOpen;
+    const chatWindow = document.getElementById('chatbot-window');
+    const chatToggle = document.getElementById('chatbot-toggle');
+    const badge = document.querySelector('.chatbot-badge');
+    
+    if (chatbotOpen) {
+        chatWindow.classList.add('open');
+        chatToggle.classList.add('active');
+        if (badge) badge.style.display = 'none';
+        
+        // Iniciar conversación si es la primera vez
+        if (chatHistory.length === 0) {
+            setTimeout(() => showBotMessage(chatFlows.initial.message), 500);
+            setTimeout(() => showOptions(chatFlows.initial.options), 1000);
+        }
+    } else {
+        chatWindow.classList.remove('open');
+        chatToggle.classList.remove('active');
+    }
+}
+
+// Mostrar mensaje del bot
+function showBotMessage(message) {
+    const messagesContainer = document.getElementById('chatbot-messages');
+    
+    // Mostrar indicador de escritura
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = `
+        <img src="logooo.png" alt="Bot" class="message-avatar">
+        <div class="typing-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+        </div>
+    `;
+    messagesContainer.appendChild(typingIndicator);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Después de 1 segundo, mostrar el mensaje real
+    setTimeout(() => {
+        typingIndicator.remove();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'chat-message bot';
+        messageDiv.innerHTML = `
+            <img src="logooo.png" alt="Bot" class="message-avatar">
+            <div class="message-bubble">${message.replace(/\n/g, '<br>')}</div>
+        `;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        chatHistory.push({ type: 'bot', message });
+    }, 1000);
+}
+
+// Mostrar mensaje del usuario
+function showUserMessage(message) {
+    const messagesContainer = document.getElementById('chatbot-messages');
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message user';
+    messageDiv.innerHTML = `
+        <div class="message-bubble">${message}</div>
+    `;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    chatHistory.push({ type: 'user', message });
+}
+
+// Mostrar opciones
+function showOptions(options) {
+    const optionsContainer = document.getElementById('chatbot-options');
+    optionsContainer.innerHTML = '';
+    
+    options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'chat-option';
+        button.innerHTML = `${option.text}`;
+        button.onclick = () => handleOptionClick(option);
+        optionsContainer.appendChild(button);
+    });
+}
+
+// Manejar click en opción
+function handleOptionClick(option) {
+    // Mostrar la selección del usuario
+    showUserMessage(option.text);
+    
+    // Limpiar opciones
+    document.getElementById('chatbot-options').innerHTML = '';
+    
+    // Ejecutar acción o continuar conversación
+    setTimeout(() => {
+        if (option.action) {
+            executeAction(option.action);
+        } else if (option.next) {
+            const nextFlow = chatFlows[option.next];
+            showBotMessage(nextFlow.message);
+            setTimeout(() => showOptions(nextFlow.options), 1500);
+            conversationState = option.next;
+        }
+    }, 500);
+}
+
+// Ejecutar acciones especiales
+function executeAction(action) {
+    switch(action) {
+        case 'openWhatsApp':
+            window.open('https://wa.me/391234567890?text=Ciao!%20Vorrei%20informazioni%20su...', '_blank');
+            showBotMessage("WhatsApp aperto! Scrivici pure. 😊");
+            setTimeout(() => showOptions([{ text: "↩️ Torna al Menu", next: "initial" }]), 1500);
+            break;
+            
+        case 'call':
+            window.location.href = 'tel:+391234567890';
+            break;
+            
+        case 'goToCalculator':
+            toggleChatbot();
+            setTimeout(() => {
+                document.getElementById('prezzi').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+            break;
+            
+        case 'goToMap':
+            toggleChatbot();
+            setTimeout(() => {
+                document.getElementById('dove-siamo').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+            break;
+            
+        case 'openModal':
+            toggleChatbot();
+            setTimeout(() => toggleModal(), 300);
+            break;
+    }
+}
+
+// Resetear chat
+function resetChat() {
+    chatHistory = [];
+    conversationState = 'initial';
+    document.getElementById('chatbot-messages').innerHTML = '';
+    document.getElementById('chatbot-options').innerHTML = '';
+    
+    setTimeout(() => showBotMessage(chatFlows.initial.message), 500);
+    setTimeout(() => showOptions(chatFlows.initial.options), 1000);
+}
+
+// Inicializar chatbot al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    // Mostrar badge después de 3 segundos para llamar la atención
+    setTimeout(() => {
+        const badge = document.querySelector('.chatbot-badge');
+        if (badge && !chatbotOpen) {
+            badge.style.display = 'flex';
+        }
+    }, 3000);
 });
 
 
