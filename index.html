@@ -90,8 +90,11 @@
         </a>
         
         <div class="nav-menu" id="navMenu">
+            <div class="close-btn" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></div>
+
             <a href="#servizi" class="nav-link">Servizi</a>
             <a href="#lab" class="nav-link">Color Lab</a>
+            <a href="#galleria" class="nav-link">Galleria</a>
             <a href="#visione" class="nav-link">Visione</a>
             <a href="#prezzi" class="nav-link">Listino</a>
             <a href="javascript:void(0)" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.8rem;" onclick="toggleModal()">Prenota</a>
@@ -99,6 +102,9 @@
 
         <div style="display: flex; align-items: center; gap: 15px;">
             <div id="status-badge" class="status-badge">● CHECKING...</div>
+            <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">
+                <i class="fa-solid fa-moon"></i>
+            </button>
             <div class="menu-toggle" onclick="toggleMenu()">
                 <i class="fa-solid fa-bars"></i>
             </div>
@@ -234,6 +240,534 @@
     </section>
 
     <!-- ============================================
+         GALLERY SECTION
+         ============================================ -->
+    <section class="section" id="galleria" style="background: white;">
+        <div class="section-header reveal">
+            <h2>Galleria Riparazioni</h2>
+            <div class="divider"></div>
+            <p style="margin-top: 15px; color: #666;">I nostri lavori parlano da soli. Eccellenza in ogni dettaglio.</p>
+        </div>
+
+        <div class="gallery-container reveal scale-in">
+            <!-- Gallery Item 1 -->
+            <div class="gallery-item" onclick="openLightbox(0)">
+                <img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=600" alt="Riparazione 1">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Verniciatura Completa BMW</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 2 -->
+            <div class="gallery-item" onclick="openLightbox(1)">
+                <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=600" alt="Riparazione 2">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Levabolli Grandine Mercedes</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 3 -->
+            <div class="gallery-item" onclick="openLightbox(2)">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=600" alt="Riparazione 3">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Restauro Tesla Model S</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 4 -->
+            <div class="gallery-item" onclick="openLightbox(3)">
+                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=600" alt="Riparazione 4">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Riparazione Paraurti Audi</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 5 -->
+            <div class="gallery-item" onclick="openLightbox(4)">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=600" alt="Riparazione 5">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Verniciatura Opaca Porsche</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 6 -->
+            <div class="gallery-item" onclick="openLightbox(5)">
+                <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=600" alt="Riparazione 6">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Riparazione Cofano Ferrari</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 7 -->
+            <div class="gallery-item" onclick="openLightbox(6)">
+                <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=600" alt="Riparazione 7">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Restauro Completo Range Rover</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 8 -->
+            <div class="gallery-item" onclick="openLightbox(7)">
+                <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=600" alt="Riparazione 8">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Verniciatura Metallizzata</p>
+                </div>
+            </div>
+
+            <!-- Gallery Item 9 -->
+            <div class="gallery-item" onclick="openLightbox(8)">
+                <img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=600" alt="Riparazione 9">
+                <div class="gallery-overlay">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <p>Riparazione Sportiva</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         LIGHTBOX MODAL
+         ============================================ -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <span class="lightbox-prev" onclick="event.stopPropagation(); changeLightboxImage(-1)">&#10094;</span>
+        <span class="lightbox-next" onclick="event.stopPropagation(); changeLightboxImage(1)">&#10095;</span>
+        <img id="lightbox-img" src="" alt="Gallery Image">
+        <div id="lightbox-caption"></div>
+        <div id="lightbox-counter"></div>
+    </div>
+
+    <!-- ============================================
+         TESTIMONIALS SECTION
+         ============================================ -->
+    <section class="section" id="testimonios" style="background: var(--grey);">
+        <div class="section-header reveal">
+            <h2 style="color: white;">Cosa Dicono i Nostri Clienti</h2>
+            <div class="divider"></div>
+            <p style="color: rgba(255,255,255,0.7); margin-top: 15px;">Storie reali di clienti soddisfatti</p>
+        </div>
+
+        <div class="testimonials-container reveal scale-in">
+            <button class="testimonial-nav prev" onclick="changeTestimonial(-1)">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <div class="testimonial-slider">
+                <div class="testimonial-item active">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Incredibile! La mia BMW sembrava nuova dopo la verniciatura. Il sistema robotico ha garantito una finitura perfetta. Consiglio assolutamente!"</p>
+                        <div class="testimonial-author">
+                            <img src="https://i.pravatar.cc/100?img=12" alt="Marco Rossi">
+                            <div>
+                                <h4>Marco Rossi</h4>
+                                <span>BMW Serie 5 - Verniciatura Completa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Dopo la grandine pensavo di dover cambiare auto. Loro hanno fatto miracoli con la tecnica PDR. Risparmio incredibile e risultato perfetto!"</p>
+                        <div class="testimonial-author">
+                            <img src="https://i.pravatar.cc/100?img=45" alt="Laura Bianchi">
+                            <div>
+                                <h4>Laura Bianchi</h4>
+                                <span>Audi A4 - Riparazione Grandine</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item">
+                    <div class="testimonial-content">
+                        <div class="stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Professionisti certificati per veicoli elettrici. Mi hanno riparato la Tesla con competenza e cura. Personale preparato e gentile."</p>
+                        <div class="testimonial-author">
+                            <img src="https://i.pravatar.cc/100?img=33" alt="Giovanni Verdi">
+                            <div>
+                                <h4>Giovanni Verdi</h4>
+                                <span>Tesla Model 3 - Riparazione Portiera</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="testimonial-nav next" onclick="changeTestimonial(1)">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="testimonial-dots">
+            <span class="dot active" onclick="goToTestimonial(0)"></span>
+            <span class="dot" onclick="goToTestimonial(1)"></span>
+            <span class="dot" onclick="goToTestimonial(2)"></span>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PROCESS TIMELINE
+         ============================================ -->
+    <section class="section" id="processo" style="background: white;">
+        <div class="section-header reveal">
+            <h2>Il Nostro Processo</h2>
+            <div class="divider"></div>
+            <p style="margin-top: 15px; color: #666;">5 passi verso la perfezione</p>
+        </div>
+
+        <div class="timeline-container reveal">
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <h3>1. Diagnosi Gratuita</h3>
+                    <p>Ispezioniamo il danno e ti forniamo un preventivo dettagliato entro 24 ore. Zero sorprese, massima trasparenza.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div class="timeline-content">
+                    <h3>2. Preparazione</h3>
+                    <p>Smontiamo le parti danneggiate, puliamo e prepariamo la superficie con cura millimetrica. La base è tutto.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fa-solid fa-palette"></i>
+                </div>
+                <div class="timeline-content">
+                    <h3>3. Corrispondenza Colore</h3>
+                    <p>Il nostro spettrofotometro digitale scansiona e crea la formula esatta. Precisione al 99.9% garantita.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="timeline-content">
+                    <h3>4. Verniciatura Robotica</h3>
+                    <p>I nostri robot applicano la vernice in cabina a forno pressurizzata. Risultato uniforme e duraturo nel tempo.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fa-solid fa-certificate"></i>
+                </div>
+                <div class="timeline-content">
+                    <h3>5. Controllo Qualità</h3>
+                    <p>Ispezione finale punto per punto. Solo se perfetta, torna a te. Con garanzia a vita sulla verniciatura.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PRICE COMPARISON
+         ============================================ -->
+    <section class="section" id="confronto" style="background: var(--light);">
+        <div class="section-header reveal">
+            <h2>Perché Scegliere D&M?</h2>
+            <div class="divider"></div>
+            <p style="margin-top: 15px; color: #666;">Confronto trasparente con le carrozzerie tradizionali</p>
+        </div>
+
+        <div class="comparison-table reveal scale-in">
+            <div class="comparison-header">
+                <div></div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-crown" style="color: var(--accent); font-size: 2rem; margin-bottom: 10px;"></i>
+                    <h3>D&M Carrozzeria</h3>
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-wrench" style="color: #999; font-size: 2rem; margin-bottom: 10px;"></i>
+                    <h3>Carrozzerie Standard</h3>
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Verniciatura</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> Robotica 4.0
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> Manuale
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Corrispondenza Colore</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> Spettrofotometro Digitale
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> A Occhio
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Garanzia</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> A Vita
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> 1-2 Anni
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Certificazioni EV</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> PES/PAV
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> No
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Vernici Eco</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> All'Acqua (Zero VOC)
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> Solventi
+                </div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Auto di Cortesia</div>
+                <div class="comparison-column highlight">
+                    <i class="fa-solid fa-check"></i> Gratuita
+                </div>
+                <div class="comparison-column">
+                    <i class="fa-solid fa-xmark"></i> A Pagamento
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         CERTIFICATIONS
+         ============================================ -->
+    <section class="section" id="certificazioni" style="background: white;">
+        <div class="section-header reveal">
+            <h2>Certificazioni & Riconoscimenti</h2>
+            <div class="divider"></div>
+            <p style="margin-top: 15px; color: #666;">La qualità che ci distingue</p>
+        </div>
+
+        <div class="certifications-grid reveal scale-in">
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h4>ISO 9001:2015</h4>
+                <p>Certificazione Qualità Internazionale</p>
+            </div>
+
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <h4>Zero VOC</h4>
+                <p>Vernici Eco-Friendly Certificate</p>
+            </div>
+
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h4>PES/PAV</h4>
+                <p>Certificato Veicoli Elettrici</p>
+            </div>
+
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h4>Garanzia Ufficiale</h4>
+                <p>Partner Assicurazioni Nazionali</p>
+            </div>
+
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h4>Best of 2025</h4>
+                <p>Premio Carrozzeria Toscana</p>
+            </div>
+
+            <div class="cert-card">
+                <div class="cert-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <h4>5 Stelle Google</h4>
+                <p>150+ Recensioni Verificate</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PARTNERS & BRANDS
+         ============================================ -->
+    <section class="section" id="partners" style="background: var(--grey);">
+        <div class="section-header reveal">
+            <h2 style="color: white;">Partner & Fornitori</h2>
+            <div class="divider"></div>
+            <p style="color: rgba(255,255,255,0.7); margin-top: 15px;">Collaboriamo con i migliori del settore</p>
+        </div>
+
+        <div class="partners-grid reveal scale-in">
+            <div class="partner-logo">
+                <div class="partner-placeholder">AXALTA</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">PPG</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">SIKKENS</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">3M</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">DUPONT</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">GENERALI</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">ALLIANZ</div>
+            </div>
+            <div class="partner-logo">
+                <div class="partner-placeholder">ACI</div>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: rgba(255,255,255,0.6); margin-top: 40px; font-size: 0.9rem;">
+            Usiamo solo prodotti premium per garantire risultati duraturi
+        </p>
+    </section>
+
+    <!-- ============================================
+         CASE STUDIES
+         ============================================ -->
+    <section class="section" id="progetti" style="background: white;">
+        <div class="section-header reveal">
+            <h2>Progetti Speciali</h2>
+            <div class="divider"></div>
+            <p style="margin-top: 15px; color: #666;">I nostri lavori più complessi e soddisfacenti</p>
+        </div>
+
+        <div class="case-studies-container reveal scale-in">
+            <!-- Case Study 1 -->
+            <div class="case-study">
+                <div class="case-study-image">
+                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800" alt="Tesla Restoration">
+                    <div class="case-badge">PROGETTO COMPLESSO</div>
+                </div>
+                <div class="case-study-content">
+                    <h3>Restauro Tesla Model S - Da Incidente a Showroom</h3>
+                    <div class="case-meta">
+                        <span><i class="fa-solid fa-calendar"></i> Gennaio 2026</span>
+                        <span><i class="fa-solid fa-clock"></i> 12 Giorni</span>
+                    </div>
+                    <p><strong>La Sfida:</strong> Tesla Model S coinvolta in incidente stradale con danni strutturali al cofano e portiere. Richiesta del cliente: tornare allo stato originale.</p>
+                    <p><strong>La Soluzione:</strong> Raddrizzatura lamiera, sostituzione parti danneggiate, verniciatura robotica completa con finitura metallizzata. Certificazione PES per lavoro su veicolo elettrico.</p>
+                    <p><strong>Il Risultato:</strong> "Sembra appena uscita dalla concessionaria!" - Cliente soddisfatto al 100%</p>
+                    <div class="case-tags">
+                        <span class="tag">Verniciatura Completa</span>
+                        <span class="tag">Riparazione Strutturale</span>
+                        <span class="tag">Veicolo Elettrico</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Study 2 -->
+            <div class="case-study">
+                <div class="case-study-image">
+                    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800" alt="Hail Damage">
+                    <div class="case-badge">150+ AMMACCATURE</div>
+                </div>
+                <div class="case-study-content">
+                    <h3>Miracolo Post-Grandine - Mercedes Classe C</h3>
+                    <div class="case-meta">
+                        <span><i class="fa-solid fa-calendar"></i> Dicembre 2025</span>
+                        <span><i class="fa-solid fa-clock"></i> 5 Giorni</span>
+                    </div>
+                    <p><strong>La Sfida:</strong> Oltre 150 ammaccature da grandine su cofano, tetto e portiere. Cliente quasi rassegnato a venderla.</p>
+                    <p><strong>La Soluzione:</strong> Tecnica PDR (Paintless Dent Repair) applicata con precisione chirurgica. Zero riverniciatura, preservata la vernice originale.</p>
+                    <p><strong>Il Risultato:</strong> Risparmio di €3.500 rispetto alla verniciatura. Auto perfetta, valore mantenuto. Il cliente ha scritto una recensione a 5 stelle.</p>
+                    <div class="case-tags">
+                        <span class="tag">PDR</span>
+                        <span class="tag">Grandine</span>
+                        <span class="tag">Fast Repair</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Study 3 -->
+            <div class="case-study">
+                <div class="case-study-image">
+                    <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=800" alt="Custom Paint">
+                    <div class="case-badge">VERNICIATURA OPACA</div>
+                </div>
+                <div class="case-study-content">
+                    <h3>Porsche 911 - Verniciatura Opaca Personalizzata</h3>
+                    <div class="case-meta">
+                        <span><i class="fa-solid fa-calendar"></i> Novembre 2025</span>
+                        <span><i class="fa-solid fa-clock"></i> 8 Giorni</span>
+                    </div>
+                    <p><strong>La Sfida:</strong> Cliente voleva una finitura opaca (matte) unica su Porsche 911. Colore personalizzato senza campione di riferimento.</p>
+                    <p><strong>La Soluzione:</strong> Creazione formula colore custom con il nostro laboratorio. Applicazione vernice opaca triplo strato con sistema robotizzato per uniformità perfetta.</p>
+                    <p><strong>Il Risultato:</strong> Una Porsche davvero unica. Il cliente è tornato per far fare lo stesso lavoro sulla sua seconda auto.</p>
+                    <div class="case-tags">
+                        <span class="tag">Custom Paint</span>
+                        <span class="tag">Matte Finish</span>
+                        <span class="tag">Veicolo Premium</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
          VISION SECTION
          ============================================ -->
     <section class="section" id="visione" style="background: white;">
@@ -296,63 +830,84 @@
     <!-- ============================================
          PRICING CALCULATOR
          ============================================ -->
-    <section class="section" id="prezzi" style="background: var(--grey); color: white;">
+    <section class="section" id="prezzi" style="background: #f4f7f6; color: var(--dark);">
         <div class="section-header reveal">
-            <h2 style="color: white;">Preventivo <span style="color: var(--accent);">Intelligente</span></h2>
+            <h2 style="color: var(--dark);">Preventivo <span style="color: var(--primary);">Intelligente</span></h2>
             <div class="divider"></div>
-            <p style="color: #888;">Seleziona le parti da riparare. Il nostro algoritmo ti darà una stima immediata.</p>
+            <p style="color: #666;">Personalizza il tuo intervento e ottieni una stima immediata.</p>
         </div>
 
-        <div class="calc-container reveal scale-in">
-            <!-- Panel de selección -->
+        <div class="calc-container reveal scale-in" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.08);">
+            
             <div class="calc-panel">
-                <h3 class="calc-title">
-                    <i class="fa-solid fa-car-burst"></i> Zone Danneggiate
-                </h3>
+                
+                <div style="margin-bottom: 25px;">
+                    <h4 style="margin-bottom: 10px; color: var(--primary);"><i class="fa-solid fa-paintbrush"></i> 1. Scegli Finitura</h4>
+                    <select id="paintFinish" class="form-input" style="width: 100%; border: 1px solid #ddd;">
+                        <option value="1">Standard (Lucido/Pastello)</option>
+                        <option value="1.2">Metallizzato (+20%)</option>
+                        <option value="1.4">Perlato / Triplo Strato (+40%)</option>
+                        <option value="1.5">Opaco / Matte (+50%)</option>
+                    </select>
+                </div>
+
+                <h4 style="margin-bottom: 15px; color: var(--primary);"><i class="fa-solid fa-car-burst"></i> 2. Seleziona Zone</h4>
                 <div class="calc-grid">
-                    <button class="calc-btn" onclick="togglePart(this, 250, 'Paraurti Anteriore')">
-                        <i class="fa-solid fa-layer-group"></i> Paraurti Ant.
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 250, 'Paraurti Anteriore')">
+                        <i class="fa-solid fa-car-front fa-2x"></i>
+                        <span>Paraurti Ant.</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 250, 'Paraurti Posteriore')">
-                        <i class="fa-solid fa-layer-group"></i> Paraurti Post.
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 250, 'Paraurti Posteriore')">
+                        <i class="fa-solid fa-car-rear fa-2x"></i>
+                        <span>Paraurti Post.</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 350, 'Cofano')">
-                        <i class="fa-solid fa-shield"></i> Cofano
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 350, 'Cofano')">
+                        <i class="fa-solid fa-window-maximize fa-2x"></i> 
+                        <span>Cofano</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 300, 'Portiera')">
-                        <i class="fa-solid fa-door-open"></i> Portiera
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 300, 'Portiera')">
+                        <i class="fa-solid fa-door-open fa-2x"></i>
+                        <span>Portiera</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 400, 'Tetto')">
-                        <i class="fa-solid fa-cloud"></i> Tetto
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 400, 'Tetto')">
+                        <i class="fa-solid fa-border-all fa-2x"></i> 
+                        <span>Tetto</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 200, 'Parafango')">
-                        <i class="fa-solid fa-car-side"></i> Parafango
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 200, 'Parafango')">
+                        <i class="fa-solid fa-car-side fa-2x"></i>
+                        <span>Parafango</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 150, 'Specchietto')">
-                        <i class="fa-solid fa-eye"></i> Specchietti
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 150, 'Specchietto')">
+                        <i class="fa-regular fa-square fa-2x"></i>
+                        <span>Specchietti</span>
                     </button>
-                    <button class="calc-btn" onclick="togglePart(this, 80, 'Lucidatura Fari')">
-                        <i class="fa-solid fa-lightbulb"></i> Fari (Lucidatura)
+                    
+                    <button class="calc-btn light-theme" onclick="togglePart(event, this, 80, 'Lucidatura Fari')">
+                        <i class="fa-regular fa-lightbulb fa-2x"></i>
+                        <span>Fari (Lucidatura)</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Display de resultados -->
-            <div class="calc-display">
+            <div class="calc-display" style="background: var(--dark); border-radius: 15px; color: white;">
                 <div class="calc-screen">
-                    <span class="calc-label">STIMA TOTALE</span>
+                    <span class="calc-label" style="color: #aaa;">STIMA TOTALE</span>
                     <div class="calc-price">€ <span id="totalPrice">0</span></div>
+                    <div style="height: 1px; background: #444; margin: 15px 0;"></div>
                     <ul id="selectedList" class="calc-list">
-                        <li>Nessuna parte selezionata...</li>
+                        <li style="color: #888;">Nessuna parte selezionata...</li>
                     </ul>
                 </div>
                 
-                <button class="btn-primary" onclick="bookEstimate()" style="width: 100%; margin-top: 20px;">
+                <button class="btn-primary" onclick="bookEstimate()" style="width: 100%; margin-top: 20px; background: white; color: var(--dark);">
                     <i class="fa-brands fa-whatsapp"></i> Prenota Ora
                 </button>
-                <p style="font-size: 0.8rem; color: #555; text-align: center; margin-top: 10px;">
-                    *Prezzo indicativo. Ispezione finale richiesta.
-                </p>
             </div>
         </div>
     </section>
@@ -465,6 +1020,55 @@
             &copy; 2026 D&M Carrozzeria. Design by Ventor Robotics.
         </div>
     </footer>
+
+    <!-- ============================================
+         CHATBOT WIDGET
+         ============================================ -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <!-- Chat Toggle Button -->
+        <button id="chatbot-toggle" class="chatbot-toggle" onclick="toggleChatbot()">
+            <i class="fa-solid fa-comments"></i>
+            <span class="chatbot-badge">1</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chatbot-window" class="chatbot-window">
+            <!-- Header -->
+            <div class="chatbot-header">
+                <div class="chatbot-header-content">
+                    <img src="logooo.png" alt="D&M" class="chatbot-avatar">
+                    <div>
+                        <h4>Assistente D&M</h4>
+                        <span class="chatbot-status">
+                            <span class="status-dot"></span>
+                            Online
+                        </span>
+                    </div>
+                </div>
+                <button class="chatbot-close" onclick="toggleChatbot()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="chatbot-messages" class="chatbot-messages">
+                <!-- Messages will be added here by JavaScript -->
+            </div>
+
+            <!-- Options Container -->
+            <div id="chatbot-options" class="chatbot-options">
+                <!-- Options will be added here by JavaScript -->
+            </div>
+
+            <!-- Footer -->
+            <div class="chatbot-footer">
+                <button class="chatbot-reset" onclick="resetChat()">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Ricomincia
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- ============================================
          WHATSAPP FLOATING BUTTON
