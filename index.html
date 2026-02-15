@@ -52,6 +52,11 @@
     <div id="scroll-progress"></div>
 
     <!-- ============================================
+         ANIMATED PARTICLES BACKGROUND
+         ============================================ -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- ============================================
          BOOKING MODAL
          ============================================ -->
     <div class="modal-overlay" id="bookingModal">
@@ -90,18 +95,59 @@
         </a>
         
         <div class="nav-menu" id="navMenu">
-            <div class="close-btn" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></div>
+            <!-- Mobile Menu Header -->
+            <div class="mobile-menu-header">
+                <div class="mobile-header-content">
+                    <img src="logooo.png" alt="D&M" class="mobile-logo">
+                    <div>
+                        <h3>D&M Carrozzeria</h3>
+                        <p class="mobile-tagline">Perfezione Robotica</p>
+                    </div>
+                </div>
+                <div class="close-btn" onclick="toggleMenu()">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+            </div>
 
-            <a href="#servizi" class="nav-link">Servizi</a>
-            <a href="#lab" class="nav-link">Color Lab</a>
-            <a href="#galleria" class="nav-link">Galleria</a>
-            <a href="#visione" class="nav-link">Visione</a>
-            <a href="#prezzi" class="nav-link">Listino</a>
-            <a href="javascript:void(0)" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.8rem;" onclick="toggleModal()">Prenota</a>
+            <!-- Mobile Status Badge -->
+            <div class="mobile-status-badge" id="mobile-status-badge">
+                <span class="mobile-status-dot"></span>
+                <span class="mobile-status-text">CHECKING...</span>
+            </div>
+
+            <!-- Navigation Links with Icons -->
+            <a href="#servizi" class="nav-link" onclick="toggleMenu()">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Servizi</span>
+            </a>
+            <a href="#lab" class="nav-link" onclick="toggleMenu()">
+                <i class="fa-solid fa-palette"></i>
+                <span>Color Lab</span>
+            </a>
+            <a href="#galleria" class="nav-link" onclick="toggleMenu()">
+                <i class="fa-solid fa-images"></i>
+                <span>Galleria</span>
+            </a>
+            <a href="#visione" class="nav-link" onclick="toggleMenu()">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span>Visione</span>
+            </a>
+            <a href="#prezzi" class="nav-link" onclick="toggleMenu()">
+                <i class="fa-solid fa-calculator"></i>
+                <span>Listino</span>
+            </a>
+            
+            <!-- Mobile Prenota Button -->
+            <a href="javascript:void(0)" class="btn-primary mobile-prenota-btn" onclick="toggleModal(); toggleMenu();">
+                <i class="fa-solid fa-calendar-check"></i> Prenota
+            </a>
+
+            <!-- Decorative Wave -->
+            <div class="mobile-menu-wave"></div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 15px;">
-            <div id="status-badge" class="status-badge">● CHECKING...</div>
+            <div id="status-badge" class="status-badge desktop-only">● CHECKING...</div>
             <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">
                 <i class="fa-solid fa-moon"></i>
             </button>
@@ -1011,9 +1057,9 @@
         <p>Via del Lavoro, Firenzuola (FI) | P.IVA 12345678901</p>
         
         <div class="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Termini di Servizio</a>
-            <a href="#">Lavora con Noi</a>
+            <a href="ventor2.html">Privacy Policy</a>
+            <a href="ventor3.html">Termini di Servizio</a>
+            <a href="ventor4.html">Lavora con Noi</a>
         </div>
         
         <div style="margin-top: 30px; font-size: 0.8rem; color: #666;">
