@@ -7,6 +7,7 @@
    TABLA DE CONTENIDOS:
    1. Variables Globales
    2. Loader & Progress Bar
+   2.5. Animated Particles System
    3. Scroll Animations
    4. Navigation
    5. Color Lab
@@ -49,6 +50,9 @@ window.addEventListener('load', () => {
             if (heroReveal) heroReveal.classList.add('active');
         }, 800);
     }, 1500);
+    
+    // Iniciar partículas después de que cargue la página
+    initParticles();
 });
 
 // Scroll Progress Bar
@@ -72,6 +76,131 @@ window.addEventListener('scroll', () => {
         }
     }
 });
+
+
+// ==========================================
+// 2.5 ANIMATED PARTICLES SYSTEM
+// ==========================================
+function initParticles() {
+    const canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrameId;
+    
+    // Ajustar tamaño del canvas
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Clase Partícula
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.opacity = Math.random() * 0.5 + 0.2;
+            
+            // Colores variados
+            const colors = [
+                'rgba(0, 128, 128, 0.6)',    // Primary
+                'rgba(255, 191, 0, 0.6)',    // Accent
+                'rgba(102, 126, 234, 0.6)',  // Purple
+                'rgba(75, 192, 192, 0.6)'    // Teal
+            ];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            
+            // Rebotar en los bordes
+            if (this.x > canvas.width || this.x < 0) {
+                this.speedX *= -1;
+            }
+            if (this.y > canvas.height || this.y < 0) {
+                this.speedY *= -1;
+            }
+            
+            // Pequeña variación aleatoria en la dirección
+            this.speedX += (Math.random() - 0.5) * 0.02;
+            this.speedY += (Math.random() - 0.5) * 0.02;
+            
+            // Limitar velocidad
+            const maxSpeed = 1;
+            this.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, this.speedX));
+            this.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, this.speedY));
+        }
+        
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.opacity;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+    
+    // Crear partículas iniciales
+    function createParticles() {
+        const particleCount = Math.floor((canvas.width * canvas.height) / 15000);
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+    
+    // Conectar partículas cercanas
+    function connectParticles() {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 120) {
+                    ctx.strokeStyle = `rgba(0, 128, 128, ${0.15 * (1 - distance / 120)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+    
+    // Animar partículas
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        
+        connectParticles();
+        
+        animationFrameId = requestAnimationFrame(animate);
+    }
+    
+    // Iniciar
+    createParticles();
+    animate();
+    
+    // Limpiar al cambiar de página
+    window.addEventListener('beforeunload', () => {
+        cancelAnimationFrame(animationFrameId);
+    });
+}
 
 
 // ==========================================
@@ -468,6 +597,7 @@ function checkStatus() {
         isOpen = true;
     }
 
+    // Badge desktop
     const badge = document.getElementById('status-badge');
     if (badge) {
         if (isOpen) {
@@ -478,6 +608,27 @@ function checkStatus() {
             badge.style.background = '#f8d7da';
             badge.style.color = '#721c24';
             badge.innerText = '● CHIUSO';
+        }
+    }
+
+    // Badge móvil
+    const mobileBadge = document.getElementById('mobile-status-badge');
+    const mobileStatusDot = document.querySelector('.mobile-status-dot');
+    const mobileStatusText = document.querySelector('.mobile-status-text');
+    
+    if (mobileBadge && mobileStatusDot && mobileStatusText) {
+        if (isOpen) {
+            mobileBadge.style.background = 'rgba(76, 175, 80, 0.15)';
+            mobileBadge.style.borderLeft = '4px solid #4caf50';
+            mobileStatusDot.style.background = '#4caf50';
+            mobileStatusText.textContent = 'APERTO';
+            mobileStatusText.style.color = '#4caf50';
+        } else {
+            mobileBadge.style.background = 'rgba(255, 82, 82, 0.15)';
+            mobileBadge.style.borderLeft = '4px solid #ff5252';
+            mobileStatusDot.style.background = '#ff5252';
+            mobileStatusText.textContent = 'CHIUSO';
+            mobileStatusText.style.color = '#ff5252';
         }
     }
 }
@@ -1013,7 +1164,7 @@ function toggleChatbot() {
         // Iniciar conversación si es la primera vez
         if (chatHistory.length === 0) {
             setTimeout(() => showBotMessage(chatFlows.initial.message), 500);
-            setTimeout(() => showOptions(chatFlows.initial.options), 1000);
+            setTimeout(() => showContinueButton(chatFlows.initial.options), 1500);
         }
     } else {
         chatWindow.classList.remove('open');
@@ -1085,6 +1236,21 @@ function showOptions(options) {
     });
 }
 
+// Mostrar botón "Continua"
+function showContinueButton(nextOptions) {
+    const optionsContainer = document.getElementById('chatbot-options');
+    optionsContainer.innerHTML = '';
+    
+    const button = document.createElement('button');
+    button.className = 'chat-continue-btn';
+    button.innerHTML = `Continua <i class="fa-solid fa-arrow-right"></i>`;
+    button.onclick = () => {
+        optionsContainer.innerHTML = '';
+        showOptions(nextOptions);
+    };
+    optionsContainer.appendChild(button);
+}
+
 // Manejar click en opción
 function handleOptionClick(option) {
     // Mostrar la selección del usuario
@@ -1100,7 +1266,8 @@ function handleOptionClick(option) {
         } else if (option.next) {
             const nextFlow = chatFlows[option.next];
             showBotMessage(nextFlow.message);
-            setTimeout(() => showOptions(nextFlow.options), 1500);
+            // Mostrar botón "Continua" en lugar de opciones directas
+            setTimeout(() => showContinueButton(nextFlow.options), 1500);
             conversationState = option.next;
         }
     }, 500);
@@ -1112,7 +1279,7 @@ function executeAction(action) {
         case 'openWhatsApp':
             window.open('https://wa.me/391234567890?text=Ciao!%20Vorrei%20informazioni%20su...', '_blank');
             showBotMessage("WhatsApp aperto! Scrivici pure. 😊");
-            setTimeout(() => showOptions([{ text: "↩️ Torna al Menu", next: "initial" }]), 1500);
+            setTimeout(() => showContinueButton([{ text: "↩️ Torna al Menu", next: "initial" }]), 1500);
             break;
             
         case 'call':
@@ -1148,7 +1315,7 @@ function resetChat() {
     document.getElementById('chatbot-options').innerHTML = '';
     
     setTimeout(() => showBotMessage(chatFlows.initial.message), 500);
-    setTimeout(() => showOptions(chatFlows.initial.options), 1000);
+    setTimeout(() => showContinueButton(chatFlows.initial.options), 1500);
 }
 
 // Inicializar chatbot al cargar
